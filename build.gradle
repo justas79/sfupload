@@ -1,0 +1,62 @@
+import com.amazonaws.auth.AWSCredentials
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
+
+buildscript {
+    ext {
+        awsVersion = '1.11.363'
+    }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("com.amazonaws:aws-java-sdk-core:${awsVersion}")
+        classpath("com.amazonaws:aws-java-sdk-s3:${awsVersion}")
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.1'
+        classpath('se.transmode.gradle:gradle-docker:1.2')
+        classpath('jp.classmethod.aws:gradle-aws-plugin:0.32')
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+group 'trinkiskart.intercom'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+//AWSCredentials awsCredentials = new ProfileCredentialsProvider().credentials;
+AWSCredentials awsCredentials = DefaultAWSCredentialsProviderChain.getInstance().credentials;
+
+repositories {
+    maven {
+        url "s3://pmr.bokun.io/snapshots"
+        credentials(AwsCredentials) {
+            accessKey awsCredentials.AWSAccessKeyId
+            secretKey awsCredentials.AWSSecretKey
+        }
+    }
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+    maven {
+        url "s3://pmr.bokun.io/release"
+        credentials(AwsCredentials) {
+            accessKey awsCredentials.AWSAccessKeyId
+            secretKey awsCredentials.AWSSecretKey
+        }
+    }
+}
+
+dependencies {
+    compile 'io.intercom:intercom-java:2.4.0'
+    compile 'io.grpc:grpc-all:1.11.0'
+    compile 'io.bokun:grpc_utils:0.1'
+    compile 'io.bokun.metrics:metrics-api-grpc:0.0.30'
+    compile 'io.bokun.metrics:metrics-control-api-grpc:0.0.7'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
